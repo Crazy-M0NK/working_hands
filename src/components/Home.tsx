@@ -3,6 +3,7 @@ import { request } from '../api/requests';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,7 +15,21 @@ import { Shift } from '../types';
 const Item = ({ data }: { data: Shift }) => {
   return (
     <TouchableOpacity style={styles.itemContainer}>
-      <Text style={styles.itemText}>{data.companyName}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <Image
+          style={{ borderRadius: 16, height: 75, aspectRatio: 1 }}
+          source={{ uri: data.logo }}
+        />
+        <View style={{ gap: 6, alignItems: 'flex-start' }}>
+          <Text style={styles.itemText}>{data.companyName}</Text>
+          <Text style={styles.itemTextSmall}>
+            {data.dateStartByCity} {data.timeStartByCity}
+          </Text>
+          <Text style={[styles.itemText, styles.itemsTextOrange]}>
+            {data.priceWorker} ₽
+          </Text>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -44,8 +59,10 @@ export function Home() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>Смены рядом с вами</Text>
       <FlatList
         data={shifts}
+        contentContainerStyle={{ gap: 6 }}
         renderItem={({ item }) => <Item data={item} />}
         keyExtractor={item => item.id}
         refreshing={isRefresh}
@@ -69,6 +86,8 @@ export function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 10,
+    gap: 10,
   },
   text: {
     fontSize: 21,
@@ -83,11 +102,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemContainer: {
-    padding: 16,
+    padding: 10,
     width: '100%',
+    backgroundColor: '#171717ff',
+    borderRadius: 14,
   },
   itemText: {
+    fontSize: 18,
+    lineHeight: 18,
+    fontWeight: '500',
     color: 'white',
     textAlign: 'center',
+  },
+  itemsTextOrange: {
+    color: '#FE5900',
+  },
+  itemTextSmall: {
+    fontSize: 16,
+    lineHeight: 16,
+    color: '#B3B3B3',
   },
 });
