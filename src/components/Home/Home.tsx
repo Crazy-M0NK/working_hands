@@ -10,14 +10,21 @@ import {
 import { useEffect, useState } from 'react';
 import { ShiftType } from '../../types';
 import { ShiftItem } from './ShiftItem';
+import Geolocation from '@react-native-community/geolocation';
+
+const getPositionConfig = {
+  timeout: 25000,
+  maximumAge: 3000,
+  enableHighAccuracy: true,
+};
 
 export function Home() {
   const [isRefresh, setIsRefresh] = useState(false);
   const [shifts, setShifts] = useState<ShiftType[] | null>();
+
   const getShifts = async (coords: { latitude: number; longitude: number }) => {
     try {
       const { data } = (await request.getShifts(coords)).data;
-      console.log('Shifts:', data);
       setShifts(data);
     } catch (e) {
       const error = e as AxiosError;
@@ -29,12 +36,34 @@ export function Home() {
   };
 
   useEffect(() => {
-    getShifts({ latitude: 45.039268, longitude: 38.987221 });
+    Geolocation.getCurrentPosition(
+      position =>
+        getShifts({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+      error => {
+        setIsRefresh(false);
+        console.log('Fail getting geolocation, error:', error);
+      },
+      getPositionConfig,
+    );
   }, []);
 
   useEffect(() => {
     if (!isRefresh) return;
-    getShifts({ latitude: 45.039268, longitude: 38.987221 });
+    Geolocation.getCurrentPosition(
+      position =>
+        getShifts({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+      error => {
+        setIsRefresh(false);
+        console.log('Fail getting geolocation, error:', error);
+      },
+      getPositionConfig,
+    );
   }, [isRefresh]);
 
   return (
@@ -46,6 +75,11 @@ export function Home() {
         renderItem={({ item }) => <ShiftItem data={item} />}
         keyExtractor={item => item.id}
         refreshing={isRefresh}
+        ListEmptyComponent={
+          typeof shifts === 'object' ? (
+            <Text style={styles.text}>Пока нет подходящих смен</Text>
+          ) : undefined
+        }
         onRefresh={() => {
           setIsRefresh(true);
         }}

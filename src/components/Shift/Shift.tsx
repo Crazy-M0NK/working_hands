@@ -15,7 +15,7 @@ export function Shift({ onBack, data }: Props) {
     },
     {
       label: 'Рейтинг:',
-      value: data.customerRating + ' из 5',
+      value: data.customerRating ? data.customerRating + ' из 5' : 'Нет данных',
     },
     {
       label: 'Дата начала:',
@@ -103,5 +103,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 16,
     color: '#B3B3B3',
+    maxWidth: '82%',
   },
 });
