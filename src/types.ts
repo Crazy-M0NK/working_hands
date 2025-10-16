@@ -1,4 +1,4 @@
-export interface Shift {
+export interface ShiftType {
   id: string;
   logo: string;
   address: string;
@@ -24,5 +24,5 @@ interface WorkType {
 
 export type StackParamList = {
   home: undefined;
-  shift: Shift;
+  shift: ShiftType;
 };

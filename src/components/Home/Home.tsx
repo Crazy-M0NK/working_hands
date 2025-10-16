@@ -1,43 +1,19 @@
 import { AxiosError } from 'axios';
-import { request } from '../api/requests';
+import { request } from '../../api/requests';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useEffect, useState } from 'react';
-import { Shift } from '../types';
-
-const Item = ({ data }: { data: Shift }) => {
-  return (
-    <TouchableOpacity style={styles.itemContainer}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        <Image
-          style={{ borderRadius: 16, height: 75, aspectRatio: 1 }}
-          source={{ uri: data.logo }}
-        />
-        <View style={{ gap: 6, alignItems: 'flex-start' }}>
-          <Text style={styles.itemText}>{data.companyName}</Text>
-          <Text style={styles.itemTextSmall}>
-            {data.dateStartByCity} {data.timeStartByCity}
-          </Text>
-          <Text style={[styles.itemText, styles.itemsTextOrange]}>
-            {data.priceWorker} ₽
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+import { ShiftType } from '../../types';
+import { ShiftItem } from './ShiftItem';
 
 export function Home() {
   const [isRefresh, setIsRefresh] = useState(false);
-  const [shifts, setShifts] = useState<Shift[] | null>();
-
+  const [shifts, setShifts] = useState<ShiftType[] | null>();
   const getShifts = async (coords: { latitude: number; longitude: number }) => {
     try {
       const { data } = (await request.getShifts(coords)).data;
@@ -53,22 +29,25 @@ export function Home() {
   };
 
   useEffect(() => {
-    if (shifts !== undefined) return;
     getShifts({ latitude: 45.039268, longitude: 38.987221 });
-  }, [shifts]);
+  }, []);
+
+  useEffect(() => {
+    if (!isRefresh) return;
+    getShifts({ latitude: 45.039268, longitude: 38.987221 });
+  }, [isRefresh]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.wrapper}>
       <Text style={styles.text}>Смены рядом с вами</Text>
       <FlatList
         data={shifts}
-        contentContainerStyle={{ gap: 6 }}
-        renderItem={({ item }) => <Item data={item} />}
+        contentContainerStyle={styles.contentContainerStyle}
+        renderItem={({ item }) => <ShiftItem data={item} />}
         keyExtractor={item => item.id}
         refreshing={isRefresh}
         onRefresh={() => {
           setIsRefresh(true);
-          getShifts({ latitude: 45.039268, longitude: 38.987221 });
         }}
       />
       {shifts === undefined ? (
@@ -84,11 +63,12 @@ export function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
     padding: 10,
     gap: 10,
   },
+  contentContainerStyle: { gap: 6 },
   text: {
     fontSize: 21,
     color: 'white',
@@ -100,26 +80,5 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  itemContainer: {
-    padding: 10,
-    width: '100%',
-    backgroundColor: '#171717ff',
-    borderRadius: 14,
-  },
-  itemText: {
-    fontSize: 18,
-    lineHeight: 18,
-    fontWeight: '500',
-    color: 'white',
-    textAlign: 'center',
-  },
-  itemsTextOrange: {
-    color: '#FE5900',
-  },
-  itemTextSmall: {
-    fontSize: 16,
-    lineHeight: 16,
-    color: '#B3B3B3',
   },
 });
