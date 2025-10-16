@@ -1,63 +1,62 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { request } from './src/api/requests';
-import { AxiosError } from 'axios';
+import { NavigationContainer } from '@react-navigation/native';
+import { HomeScreen } from './src/screens/Home';
+import { StackParamList } from './src/types';
+import { ShiftScreen } from './src/screens/Shift';
 
-const getShifts = async () => {
-  try {
-    const { data } = (
-      await request.getShifts({
-        latitude: 45.039268,
-        longitude: 38.987221,
-      })
-    ).data;
-    console.log('Shifts:', data);
-  } catch (e) {
-    const error = e as AxiosError;
-    console.log('Failing shifts load, error', error);
-  }
+const Stack = createNativeStackNavigator<StackParamList>();
+
+const basicScreenOptions = {
+  headerShown: false,
+  gestureEnabled: false,
+  contentStyle: { backgroundColor: '#060503' },
 };
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-  getShifts();
-
+export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle={'light-content'} />
       <AppContent />
     </SafeAreaProvider>
   );
 }
 
 function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View style={styles.wrapper}>
+      <View
+        style={[
+          styles.container,
+          { marginTop: insets.top, marginBottom: insets.bottom },
+        ]}
+      >
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={basicScreenOptions}
+            initialRouteName={'home'}
+          >
+            <Stack.Screen name="home" component={HomeScreen} />
+            <Stack.Screen name="shift" component={ShiftScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: 'black',
+  },
   container: {
     flex: 1,
   },
 });
-
-export default App;

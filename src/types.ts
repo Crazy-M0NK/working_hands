@@ -20,3 +20,8 @@ interface WorkType {
   nameLt5: string;
   nameOne: string;
 }
+
+export type StackParamList = {
+  home: undefined;
+  shift: Shift;
+};
